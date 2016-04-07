@@ -16,6 +16,7 @@ typedef struct _Node
 typedef struct _priqueue_t
 {
   Node* root;
+  Node* end;
   int size;
   int(*comp)(const void *, const void *);
 } priqueue_t;

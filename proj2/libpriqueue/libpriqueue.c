@@ -34,7 +34,9 @@ void priqueue_init(priqueue_t *q, int(*comparer)(const void *, const void *))
  */
 int priqueue_offer(priqueue_t *q, void *ptr)
 {
-	return -1;
+  q->size++;
+  q->end = ptr;
+	return q->size;
 }
 
 
