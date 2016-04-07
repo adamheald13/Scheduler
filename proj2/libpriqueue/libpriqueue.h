@@ -7,9 +7,17 @@
 /**
   Priqueue Data Structure
 */
+
+typedef struct _Node
+{
+  struct Node* next;
+} Node;
+
 typedef struct _priqueue_t
 {
-
+  Node* root;
+  int size;
+  int(*comp)(const void *, const void *);
 } priqueue_t;
 
 
