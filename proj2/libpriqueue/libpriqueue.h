@@ -4,15 +4,15 @@
 #ifndef LIBPRIQUEUE_H_
 #define LIBPRIQUEUE_H_
 
+struct Node;
 /**
   Priqueue Data Structure
 */
 
-typedef struct _Node
+typedef struct Node
 {
   struct Node* next;
 } Node;
-
 typedef struct _priqueue_t
 {
   Node* root;

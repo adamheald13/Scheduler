@@ -6,6 +6,8 @@
 
 #include "libpriqueue.h"
 
+//courtesy of Job @ http://stackoverflow.com/questions/3599160/unused-parameter-warnings-in-c-code
+#define UNUSED(x) (void)(x)
 
 /**
   Initializes the priqueue_t data structure.
@@ -50,7 +52,11 @@ int priqueue_offer(priqueue_t *q, void *ptr)
  */
 void *priqueue_peek(priqueue_t *q)
 {
-	return NULL;
+  if(q->size == 0) {
+    return NULL;
+  } else {
+    return q->root;
+  }
 }
 
 
@@ -64,7 +70,13 @@ void *priqueue_peek(priqueue_t *q)
  */
 void *priqueue_poll(priqueue_t *q)
 {
-	return NULL;
+  if(q->size == 0) {
+    return NULL;
+  } else {
+    Node *temp = q->root;
+    q->root = temp->next;
+    return temp;
+  }
 }
 
 
@@ -79,7 +91,21 @@ void *priqueue_poll(priqueue_t *q)
  */
 void *priqueue_at(priqueue_t *q, int index)
 {
-	return NULL;
+  UNUSED(q);
+
+  if(index >= q->size) {
+    return NULL;
+  } else {
+    Node* temp = q->root;
+
+    int i = 1;
+    while(i <= index) {
+      temp = temp->next;
+      i++;
+    }
+
+    return temp;
+  }
 }
 
 
@@ -94,6 +120,8 @@ void *priqueue_at(priqueue_t *q, int index)
  */
 int priqueue_remove(priqueue_t *q, void *ptr)
 {
+  UNUSED(q);
+  UNUSED(ptr);
 	return 0;
 }
 
@@ -109,6 +137,8 @@ int priqueue_remove(priqueue_t *q, void *ptr)
  */
 void *priqueue_remove_at(priqueue_t *q, int index)
 {
+  UNUSED(q);
+  UNUSED(index);
 	return 0;
 }
 
@@ -121,6 +151,7 @@ void *priqueue_remove_at(priqueue_t *q, int index)
  */
 int priqueue_size(priqueue_t *q)
 {
+  UNUSED(q);
 	return 0;
 }
 
@@ -132,5 +163,5 @@ int priqueue_size(priqueue_t *q)
  */
 void priqueue_destroy(priqueue_t *q)
 {
-
+  UNUSED(q);
 }
