@@ -120,9 +120,23 @@ void *priqueue_at(priqueue_t *q, int index)
  */
 int priqueue_remove(priqueue_t *q, void *ptr)
 {
-  UNUSED(q);
-  UNUSED(ptr);
-	return 0;
+  Node* temp = q->root->next;
+  Node* parent = q->root;
+  int num = 0;
+  while(temp != 0) {
+    if(temp == ptr) {
+      if(parent != 0) {
+        parent->next = temp;
+      } else {
+        q->root = temp->next;
+      }
+      num++;
+      free(temp);
+    }
+    parent = temp;
+    temp = temp->next;
+  }
+	return num;
 }
 
 
