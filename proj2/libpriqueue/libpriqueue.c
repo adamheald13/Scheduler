@@ -22,7 +22,7 @@
 void priqueue_init(priqueue_t *q, int(*comparer)(const void *, const void *))
 {
   q->root = 0;
-  int size = 0;
+  q->size = 0;
   q->comp = comparer;
 }
 
@@ -36,8 +36,22 @@ void priqueue_init(priqueue_t *q, int(*comparer)(const void *, const void *))
  */
 int priqueue_offer(priqueue_t *q, void *ptr)
 {
+  Node* node = malloc(sizeof(Node));
+  node->pointer = ptr;
+  node->next = 0;
+  if(q->size == 0)
+  {
+    q->size = 1;
+    q->root = node;
+    q->end = node;
+
+    return 0;
+  }
+
+  q->end->next = node;
+
   q->size++;
-  q->end = ptr;
+  q->end = node;
 	return q->size;
 }
 
@@ -55,7 +69,7 @@ void *priqueue_peek(priqueue_t *q)
   if(q->size == 0) {
     return NULL;
   } else {
-    return q->root;
+    return q->root->pointer;
   }
 }
 
@@ -74,8 +88,18 @@ void *priqueue_poll(priqueue_t *q)
     return NULL;
   } else {
     Node *temp = q->root;
-    q->root = temp->next;
-    return temp;
+    void* ptr = 0;
+    if(temp != 0)
+    {
+      q->root = temp->next;
+    }
+    else
+    {
+      q->root = 0;
+    }
+    ptr = temp->pointer;
+    free(temp);
+    return ptr;
   }
 }
 
@@ -91,8 +115,6 @@ void *priqueue_poll(priqueue_t *q)
  */
 void *priqueue_at(priqueue_t *q, int index)
 {
-  UNUSED(q);
-
   if(index >= q->size) {
     return NULL;
   } else {
@@ -104,7 +126,7 @@ void *priqueue_at(priqueue_t *q, int index)
       i++;
     }
 
-    return temp;
+    return temp->pointer;
   }
 }
 
@@ -112,7 +134,8 @@ void *priqueue_at(priqueue_t *q, int index)
 /**
   Removes all instances of ptr from the queue.
 
-  This function should not use the comparer function, but check if the data contained in each element of the queue is equal (==) to ptr.
+  This function should not use the comparer function,
+  but check if the data contained in each element of the queue is equal (==) to ptr.
 
   @param q a pointer to an instance of the priqueue_t data structure
   @param ptr address of element to be removed
@@ -120,16 +143,28 @@ void *priqueue_at(priqueue_t *q, int index)
  */
 int priqueue_remove(priqueue_t *q, void *ptr)
 {
+  if(q->size < 1)
+  {
+    return 0;
+  }
+
+
+  if(q->comp(ptr,q->root->pointer) == 0)
+  {
+    q->size--;
+    Node* temp = q->root;
+    q->root = q->root->next;
+    free(temp);
+    return 1 + priqueue_remove(q,ptr);
+  }
+
   Node* temp = q->root->next;
   Node* parent = q->root;
+
   int num = 0;
   while(temp != 0) {
-    if(temp == ptr) {
-      if(parent != 0) {
-        parent->next = temp;
-      } else {
-        q->root = temp->next;
-      }
+    if(q->comp(temp->pointer,ptr) == 0) {
+      parent->next = temp;
       num++;
       free(temp);
     }
@@ -151,9 +186,29 @@ int priqueue_remove(priqueue_t *q, void *ptr)
  */
 void *priqueue_remove_at(priqueue_t *q, int index)
 {
-  UNUSED(q);
-  UNUSED(index);
-	return 0;
+  if(index > q->size - 1)
+    return 0;
+
+  q->size--;
+
+  Node* temp = q->root;
+
+  if(index == 0)
+  {
+    q->root = q->root->next;
+    return temp;
+  }
+  Node* parent = temp;
+  temp = temp->next;
+  index--;
+  while(index > 0)
+  {
+    parent = temp;
+    temp = temp->next;
+    index--;
+  }
+  parent->next = temp->next;
+	return temp;
 }
 
 
@@ -165,8 +220,7 @@ void *priqueue_remove_at(priqueue_t *q, int index)
  */
 int priqueue_size(priqueue_t *q)
 {
-  UNUSED(q);
-	return 0;
+  return q->size;
 }
 
 
@@ -177,5 +231,11 @@ int priqueue_size(priqueue_t *q)
  */
 void priqueue_destroy(priqueue_t *q)
 {
-  UNUSED(q);
+  while(q->size > 0)
+  {
+    void* temp = priqueue_remove_at(q,0);
+    free(temp);
+  }
+  free(q->comp);
+  free(q);
 }

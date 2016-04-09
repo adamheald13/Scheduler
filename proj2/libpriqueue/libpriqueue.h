@@ -12,6 +12,7 @@ struct Node;
 typedef struct Node
 {
   struct Node* next;
+  void* pointer;
 } Node;
 typedef struct _priqueue_t
 {
