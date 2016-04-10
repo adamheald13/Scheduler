@@ -86,21 +86,21 @@ void *priqueue_poll(priqueue_t *q)
 {
   if(q->size == 0) {
     return NULL;
-  } else {
-    Node *temp = q->root;
-    void* ptr = 0;
-    if(temp != 0)
-    {
-      q->root = temp->next;
-    }
-    else
-    {
-      q->root = 0;
-    }
-    ptr = temp->pointer;
-    free(temp);
-    return ptr;
   }
+  Node *temp = q->root;
+  void* ptr = 0;
+  if(temp != 0)
+  {
+    q->root = temp->next;
+  }
+  else
+  {
+    q->root = 0;
+  }
+  ptr = temp->pointer;
+  free(temp);
+  q->size--;
+  return ptr;
 }
 
 
@@ -116,7 +116,7 @@ void *priqueue_poll(priqueue_t *q)
 void *priqueue_at(priqueue_t *q, int index)
 {
   if(index >= q->size) {
-    return NULL;
+    return 0;
   } else {
     Node* temp = q->root;
 
@@ -154,22 +154,27 @@ int priqueue_remove(priqueue_t *q, void *ptr)
     q->size--;
     Node* temp = q->root;
     q->root = q->root->next;
+    free(temp->pointer);
     free(temp);
     return 1 + priqueue_remove(q,ptr);
   }
 
-  Node* temp = q->root->next;
+  Node* current = q->root->next;
   Node* parent = q->root;
 
   int num = 0;
-  while(temp != 0) {
-    if(q->comp(temp->pointer,ptr) == 0) {
+  while(current != 0) {
+    if(q->comp(current->pointer,ptr) == 0) {
+      Node* temp = current->next;
       parent->next = temp;
       num++;
-      free(temp);
+      free(current);
+      current = temp;
+      q->size--;
+    } else {
+      parent = current;
+      current = current->next;
     }
-    parent = temp;
-    temp = temp->next;
   }
 	return num;
 }
