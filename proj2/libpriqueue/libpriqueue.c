@@ -47,12 +47,29 @@ int priqueue_offer(priqueue_t *q, void *ptr)
 
     return 0;
   }
+  Node* temp = q->root;
+  Node* parent = 0;
 
-  q->end->next = node;
+  int num = 0;
+  while(temp != 0 && q->comp(temp->pointer,ptr) < 0)
+  {
+    parent = temp;
+    temp = temp->next;
+    num++;
+  }
+  if(num == 0)
+  {
+    q->size++;
+    node->next = q->root;
+    q->root = node;
+    return 0;
+  }
+
+  parent->next = node;
+  node->next = temp;
 
   q->size++;
-  q->end = node;
-	return q->size;
+	return num;
 }
 
 
@@ -154,7 +171,6 @@ int priqueue_remove(priqueue_t *q, void *ptr)
     q->size--;
     Node* temp = q->root;
     q->root = q->root->next;
-    free(temp->pointer);
     free(temp);
     return 1 + priqueue_remove(q,ptr);
   }

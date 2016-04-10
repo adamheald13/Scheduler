@@ -57,7 +57,10 @@ int main()
 
 	printf("Elements in order queue (expected 10 13 14 20 30): ");
 	for (i = 0; i < priqueue_size(&q); i++)
-		printf("%d ", *((int *)priqueue_at(&q, i)) );
+	{
+		int result = *((int *)priqueue_at(&q, i));
+		printf("%d ", result);	
+	}
 	printf("\n");
 
 	printf("Elements in reverse order queue (expected 30 20 10): ");
