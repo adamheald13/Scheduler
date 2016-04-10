@@ -257,6 +257,4 @@ void priqueue_destroy(priqueue_t *q)
     void* temp = priqueue_remove_at(q,0);
     free(temp);
   }
-  free(q->comp);
-  free(q);
 }
