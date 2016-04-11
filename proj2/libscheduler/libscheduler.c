@@ -19,6 +19,7 @@ int preemptive;
 int numCores;
 int(*comp)(const void *, const void *);
 float waitingTime, turnaroundTime, responseTime;
+int numJobs;
 
 typedef struct _job_t
 {
@@ -80,9 +81,10 @@ int rr(const void *a, const void *b)
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
-  waitingTime = 0.0F;
-  turnaroundTime = 0.0F;
-  responseTime = 0.0F;
+  waitingTime = 0.0;
+  turnaroundTime = 0.0;
+  responseTime = 0.0;
+  numJobs = 0;
 
   numCores = cores;
 
@@ -155,6 +157,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         job_t* temp = coreInUse[x];
         coreInUse[x] = job;
         priqueue_offer(&queue,temp);
+        priqueue_offer(&preemptedJobs,job);
         return x;
       }
       x++;
@@ -183,6 +186,12 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
  */
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
+  job_t* finJob = coreInUse[core_id];
+  numJobs++;
+  waitingTime += (time - finJob->arrival_time - finJob->running_time);
+  turnaroundTime += (time - finJob->arrival_time);
+
+
   free(coreInUse[core_id]);
   coreInUse[core_id] = 0;
 
@@ -233,6 +242,10 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
+  if(numJobs > 0)
+  {
+    return waitingTime/numJobs;
+  }
 	return 0.0;
 }
 
@@ -246,6 +259,10 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
+  if(numJobs > 0)
+  {
+    return turnaroundTime/numJobs;
+  }
 	return 0.0;
 }
 
