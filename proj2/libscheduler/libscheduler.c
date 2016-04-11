@@ -17,6 +17,8 @@
 priqueue_t queue;
 int preemptive;
 int numCores;
+int(*comp)(const void *, const void *);
+float waitingTime, turnaroundTime, responseTime;
 
 typedef struct _job_t
 {
@@ -78,6 +80,10 @@ int rr(const void *a, const void *b)
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
+  waitingTime = 0.0F;
+  turnaroundTime = 0.0F;
+  responseTime = 0.0F;
+
   numCores = cores;
 
   coreInUse = malloc(sizeof(job_t) * cores);
@@ -89,7 +95,6 @@ void scheduler_start_up(int cores, scheme_t scheme)
     i++;
   }
 
-  int(*comp)(const void *, const void *);
   switch(scheme)
   {
     case FCFS: comp = fcfs; preemptive = 0; break;
@@ -142,7 +147,18 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
   if(preemptive)
   {
-
+    int x = 0;
+    while(x < numCores)
+    {
+      if(comp(coreInUse[x],job) > 0)
+      {
+        job_t* temp = coreInUse[x];
+        coreInUse[x] = job;
+        priqueue_offer(&queue,temp);
+        return x;
+      }
+      x++;
+    }
   }
 
   priqueue_offer(&queue,(void*)job);
@@ -275,7 +291,20 @@ void scheduler_clean_up()
  */
 void scheduler_show_queue()
 {
-
+  int x = 0;
+  int size = priqueue_size(&queue);
+  if(size == 0)
+  {
+    printf("Queue is empty");
+    return;
+  }
+  while(x < size)
+  {
+    job_t* job = (job_t*)priqueue_at(&queue, x);
+    printf("Index: %d Job Number:%d Arrival Time: %d Running Time: %d Priority: %d\n",
+           x, job->number, job->arrival_time, job->running_time, job->priority);
+    x++;
+  }
 }
 
 int are_Any_Cores_Idle()
