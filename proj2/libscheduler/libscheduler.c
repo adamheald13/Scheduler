@@ -157,7 +157,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         job_t* temp = coreInUse[x];
         coreInUse[x] = job;
         priqueue_offer(&queue,temp);
-        priqueue_offer(&preemptedJobs,job);
         return x;
       }
       x++;
@@ -276,7 +275,10 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-	return 0.0;
+  if(!preemptive)
+    return waitingTime/numJobs;
+  else
+    return 0.0;
 }
 
 
