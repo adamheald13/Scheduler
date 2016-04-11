@@ -43,7 +43,6 @@ int priqueue_offer(priqueue_t *q, void *ptr)
   {
     q->size = 1;
     q->root = node;
-    q->end = node;
 
     return 0;
   }
