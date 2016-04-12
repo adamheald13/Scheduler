@@ -137,7 +137,7 @@ void scheduler_start_up(int cores, scheme_t scheme)
  */
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
-  deincrement_Running_Times(time);
+  deincrement_Remaining_Times(time);
 
   job_t* job = malloc(sizeof(job_t));
   job->number = job_number;
@@ -195,7 +195,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
  */
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
-  deincrement_Running_Times(time);
+  deincrement_Remaining_Times(time);
 
   job_t* finJob = coreInUse[core_id];
   numJobs++;
@@ -235,7 +235,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-  deincrement_Running_Times(time);
+  deincrement_Remaining_Times(time);
 
   job_t* job = coreInUse[core_id];
 
@@ -357,7 +357,7 @@ int are_Any_Cores_Idle()
   return -1;
 }
 
-void deincrement_Running_Times(int time)
+void deincrement_Remaining_Times(int time)
 {
   int timeDifference = (time - currentTime);
 
