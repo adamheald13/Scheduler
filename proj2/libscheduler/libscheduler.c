@@ -294,7 +294,7 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-  if(!preemptive)
+  if(!preemptive && comp != rr)
     return waitingTime/numJobs;
   else
     return responseTime/numJobs;
