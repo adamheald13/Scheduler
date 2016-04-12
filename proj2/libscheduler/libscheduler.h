@@ -19,6 +19,7 @@ float scheduler_average_response_time  ();
 void  scheduler_clean_up               ();
 
 void  scheduler_show_queue             ();
-int  are_Any_Cores_Idle                   ();
+int  are_Any_Cores_Idle                ();
+void deincrement_Running_Times         (int time);
 
 #endif /* LIBSCHEDULER_H_ */

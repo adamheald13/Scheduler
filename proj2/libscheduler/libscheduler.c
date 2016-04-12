@@ -20,12 +20,15 @@ int numCores;
 int(*comp)(const void *, const void *);
 float waitingTime, turnaroundTime, responseTime;
 int numJobs;
+int currentTime;
 
 typedef struct _job_t
 {
   int number;
   int arrival_time;
+  int start_time;
   int running_time;
+  int remaining_time;
   int priority;
 } job_t;
 
@@ -46,7 +49,7 @@ int sjf(const void *a, const void *b)
   job_t* jobb = (job_t*)b;
   if(joba->number == jobb->number)
     return 0;
-  return joba->running_time - jobb->running_time;
+  return joba->remaining_time - jobb->remaining_time;
 }
 
 int pri(const void *a, const void *b)
@@ -85,6 +88,7 @@ void scheduler_start_up(int cores, scheme_t scheme)
   turnaroundTime = 0.0;
   responseTime = 0.0;
   numJobs = 0;
+  currentTime = 0;
 
   numCores = cores;
 
@@ -133,16 +137,21 @@ void scheduler_start_up(int cores, scheme_t scheme)
  */
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
+  deincrement_Running_Times(time);
+
   job_t* job = malloc(sizeof(job_t));
   job->number = job_number;
   job->arrival_time = time;
+  job->start_time = -1;
   job->running_time = running_time;
+  job->remaining_time = running_time;
   job->priority = priority;
 
   int core = are_Any_Cores_Idle();
   printf("Job Received Cores idle returned: %d\n", core);
   if(core != -1)
   {
+    job->start_time = time;
     coreInUse[core] = job;
     return core;
   }
@@ -155,6 +164,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       if(comp(coreInUse[x],job) > 0)
       {
         job_t* temp = coreInUse[x];
+        job->start_time = time;
         coreInUse[x] = job;
         priqueue_offer(&queue,temp);
         return x;
@@ -185,10 +195,13 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
  */
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
+  deincrement_Running_Times(time);
+
   job_t* finJob = coreInUse[core_id];
   numJobs++;
   waitingTime += (time - finJob->arrival_time - finJob->running_time);
   turnaroundTime += (time - finJob->arrival_time);
+  responseTime+=(finJob->start_time - finJob->arrival_time);
 
 
   free(coreInUse[core_id]);
@@ -197,6 +210,8 @@ int scheduler_job_finished(int core_id, int job_number, int time)
   if(priqueue_size(&queue) > 0)
   {
     job_t* job = (job_t*)priqueue_poll(&queue);
+    if(job->start_time == -1)
+      job->start_time = time;
     coreInUse[core_id] = job;
     return job->number;
   }
@@ -220,12 +235,16 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
+  deincrement_Running_Times(time);
+
   job_t* job = coreInUse[core_id];
 
   if(priqueue_size(&queue) > 0)
   {
     priqueue_offer(&queue,job);
     job = priqueue_poll(&queue);
+    if(job->start_time == -1)
+      job->start_time = time;
     coreInUse[core_id] = job;
   }
   return job->number;
@@ -278,7 +297,7 @@ float scheduler_average_response_time()
   if(!preemptive)
     return waitingTime/numJobs;
   else
-    return 0.0;
+    return responseTime/numJobs;
 }
 
 
@@ -336,4 +355,18 @@ int are_Any_Cores_Idle()
     i++;
   }
   return -1;
+}
+
+void deincrement_Running_Times(int time)
+{
+  int timeDifference = (time - currentTime);
+
+  int i = 0;
+  while(i < numCores)
+  {
+    if(coreInUse[i] != 0)
+      coreInUse[i]->remaining_time -= timeDifference;
+    i++;
+  }
+  currentTime = time;
 }
