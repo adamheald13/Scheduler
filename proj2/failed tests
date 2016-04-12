@@ -1,0 +1,15 @@
+c1 psjf proc1
+c2 ppri proc2
+c2 psjf proc2
+c1 ppri proc3
+c1 pri proc3
+c1 psjf proc3
+c1 sjf proc3
+c2 ppri proc3
+c2 pri proc3
+c2 psjf proc3
+c2 sjf proc3
+c4 ppri proc3
+c4 pri proc3
+c4 psjf proc3
+c4 sjf proc3
